@@ -5,7 +5,7 @@ import javax.persistence.GeneratedValue
 import javax.persistence.Id
 import javax.persistence.Table
 
-@Entity
+@Entity(name="customer")
 @Table(name="customer")
 class Customer (
     @Id
