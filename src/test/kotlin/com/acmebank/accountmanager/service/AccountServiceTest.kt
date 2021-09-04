@@ -2,6 +2,7 @@ package com.acmebank.accountmanager.service
 
 import com.acmebank.accountmanager.model.Account
 import com.acmebank.accountmanager.repository.AccountRepository
+import com.acmebank.accountmanager.request.TransferInstructionRequest
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -60,7 +61,7 @@ internal class AccountServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `try to withdraw from non existent account`() {
+    fun `try to withdraw from non existent account returns exception`() {
         val exception = assertThrows(Exception::class.java) {
             accountService.withdraw("55555555", 10000.0)
         }
@@ -68,11 +69,36 @@ internal class AccountServiceTest @Autowired constructor(
     }
 
     @Test
-    fun `try to withdraw but insufficient funds in account`() {
+    fun `try to withdraw but insufficient funds in account returns exception`() {
         val exception = assertThrows(Exception::class.java) {
             accountService.withdraw("88888888", 999999999.0)
         }
         assertEquals(exception.message, "Balance not enough")
     }
 
+    @Test
+    fun `transfer to another account from insufficiently funded account returns exception`() {
+        val instruction = TransferInstructionRequest(
+            "12345678",
+            "88888888",
+            9999999999.99
+        )
+        val exception = assertThrows(Exception::class.java) {
+            accountService.transfer(instruction)
+        }
+        assertEquals(exception.message, "Balance not enough")
+    }
+
+    @Test
+    fun `transfer to another account success`() {
+        val instruction = TransferInstructionRequest(
+            "12345678",
+            "88888888",
+            10000.0
+        )
+        val accounts = accountService.transfer(instruction)
+
+        assertEquals(accounts?.first()?.balance, 990000.0)
+        assertEquals(accounts?.last()?.balance, 1010000.0)
+    }
 }

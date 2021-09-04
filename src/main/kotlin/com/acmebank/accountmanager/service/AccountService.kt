@@ -2,6 +2,7 @@ package com.acmebank.accountmanager.service
 
 import com.acmebank.accountmanager.model.Account
 import com.acmebank.accountmanager.repository.AccountRepository
+import com.acmebank.accountmanager.request.TransferInstructionRequest
 import javassist.NotFoundException
 import org.springframework.stereotype.Service
 
@@ -22,7 +23,7 @@ class AccountService(val db: AccountRepository) {
             throw Exception("Account not found")
         }
 
-        return account
+        return db.findByAccountNumber(accountNumber)
     }
 
     fun withdraw(accountNumber: String, amount: Double): Account? {
@@ -39,7 +40,19 @@ class AccountService(val db: AccountRepository) {
             throw Exception("Account not found")
         }
 
-        return account
+        return db.findByAccountNumber(accountNumber)
+    }
+
+    fun transfer(instruction: TransferInstructionRequest): List<Account>? {
+        try {
+            val accounts = ArrayList<Account>()
+            withdraw(instruction.sourceAccount, instruction.amount)?.let { accounts.add(it) }
+            deposit(instruction.targetAccount, instruction.amount)?.let { accounts.add(it) }
+            return accounts
+        } catch (e: Exception) {
+            throw e
+        }
+
     }
 
 }
