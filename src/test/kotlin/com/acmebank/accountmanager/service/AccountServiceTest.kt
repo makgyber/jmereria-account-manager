@@ -38,5 +38,16 @@ internal class AccountServiceTest @Autowired constructor(val db: AccountReposito
         assert(accounts.isEmpty())
     }
 
+    @Test
+    fun `find specific account `() {
+        val account = accountService.findByAccountNumber("88888888");
+        assertEquals(account, account2)
+    }
+
+    @Test
+    fun `specific account not found`() {
+        val account = accountService.findByAccountNumber("55555555");
+        assertNull(account)
+    }
 
 }

@@ -11,4 +11,7 @@ interface AccountRepository: CrudRepository<Account, Long> {
     @Query("FROM account where customerId = ?1")
     fun fetchAccountsByCustomerId(customerId: Long): Collection<Account>
 
+    @Query("FROM account A WHERE A.accountNumber = ?1")
+    fun findByAccountNumber(accountNumber: String): Account?
+
 }
