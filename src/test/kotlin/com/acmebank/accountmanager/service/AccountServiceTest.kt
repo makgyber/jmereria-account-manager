@@ -23,11 +23,20 @@ internal class AccountServiceTest @Autowired constructor(val db: AccountReposito
 
     @Test
     fun `should return accounts for customer`() {
+
         val accounts = accountService.getAccountsByCustomerId(10001);
 
         assert(accounts.isNotEmpty())
         assert(accounts.contains(account1))
         assert(accounts.contains(account2))
     }
+
+    @Test
+    fun `when no accounts found`() {
+        val accounts = accountService.getAccountsByCustomerId(10002);
+
+        assert(accounts.isEmpty())
+    }
+
 
 }
