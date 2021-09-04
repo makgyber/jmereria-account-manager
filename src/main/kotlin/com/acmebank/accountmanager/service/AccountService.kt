@@ -12,4 +12,34 @@ class AccountService(val db: AccountRepository) {
 
     fun findByAccountNumber(accountNumber: String): Account? = db.findByAccountNumber(accountNumber)
 
+    fun deposit(accountNumber: String, amount: Double): Account? {
+        val account = db.findByAccountNumber(accountNumber)
+
+        if(null != account) {
+            val newBalance = account.balance.plus(amount)
+            db.update(newBalance, accountNumber)
+        } else {
+            throw Exception("Account not found")
+        }
+
+        return account
+    }
+
+    fun withdraw(accountNumber: String, amount: Double): Account? {
+        val account = db.findByAccountNumber(accountNumber)
+
+        if(null != account) {
+            val newBalance = account.balance.minus(amount)
+            if (newBalance >= 0) {
+                db.update(newBalance, accountNumber)
+            } else {
+                throw Exception("Balance not enough")
+            }
+        } else {
+            throw Exception("Account not found")
+        }
+
+        return account
+    }
+
 }
