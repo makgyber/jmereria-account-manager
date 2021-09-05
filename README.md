@@ -18,11 +18,69 @@ Implements a REST API that allows a customer to:
 - build then run ApplicationManagerApplicationKt
 
 ## Endpoints
-GET /api/customers/{customerId}/accounts
+### GET /api/accounts
+_Response_
+<pre>
+[
+    {
+        "id": 1,
+        "accountNumber": "12345678",
+        "balance": 994300.0,
+        "currency": "HKD",
+        "customerId": 10001
+    },
+    {
+        "id": 2,
+        "accountNumber": "88888888",
+        "balance": 1005700.0,
+        "currency": "HKD",
+        "customerId": 10001
+    }
+]
+</pre>
 
-GET /api/customers/{customerId}/accounts/{accountNumber}
+### GET /api/accounts/{accountNumber}
+_Response_
+<pre>
+{
+    "id": 2,
+    "accountNumber": "88888888",
+    "balance": 1005700.0,
+    "currency": "HKD",
+    "customerId": 10001
+}
+</pre>
 
-POST /api/customers/accounts/transfer
+### POST /api/accounts/transfer
+_Request_
+<pre>
+{
+    "sourceAccount" : "12345678",
+    "amount" : 1900, 
+    "targetAccount" : "88888888",
+    "customerId": 10001
+}
+</pre>
+_Response_
+<pre>
+{
+    "targetAccount": {
+        "id": 2,
+        "accountNumber": "88888888",
+        "balance": 1005700.0,
+        "currency": "HKD",
+        "customerId": 10001
+    },
+    "sourceAccount": {
+        "id": 1,
+        "accountNumber": "12345678",
+        "balance": 994300.0,
+        "currency": "HKD",
+        "customerId": 10001
+    }
+}
+</pre>
+
 
 ## Testing
 - Open the Postman collection in the docs/ folder in Postman.
@@ -30,7 +88,11 @@ POST /api/customers/accounts/transfer
 
 ### Data has been pre-populated with the following values:
 
-#### customerId = 10001
+#### Customer
+<pre>
+customerId = 10001
+X-Access-Token = abcdef-1234-567890
+</pre>
 
 #### First account
 <pre>
