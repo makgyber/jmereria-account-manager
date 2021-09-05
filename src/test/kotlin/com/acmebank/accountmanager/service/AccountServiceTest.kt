@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.data.rest.webmvc.support.ExcerptProjector
+import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -29,8 +29,9 @@ internal class AccountServiceTest @Autowired constructor(
         val accounts = accountService.getAccountsByCustomerId(10001)
 
         assert(accounts.isNotEmpty())
-        assert(accounts.contains(account1))
-        assert(accounts.contains(account2))
+        assertEquals(2, accounts.count())
+        assert(accounts.any() { it == account1 })
+        assert(accounts.any() { it == account2 })
     }
 
     @Test
@@ -61,9 +62,23 @@ internal class AccountServiceTest @Autowired constructor(
     }
 
     @Test
+    @DirtiesContext
+    fun `try to deposit success`() {
+        val account = accountService.deposit("12345678", 10000.0)
+        assertEquals(account?.balance, 1010000.0)
+    }
+
+    @Test
+    @DirtiesContext
+    fun `try to withdraw success`() {
+        val account = accountService.withdraw("88888888", 10000.0, customerId = 10001)
+        assertEquals(account?.balance, 990000.0)
+    }
+
+    @Test
     fun `try to withdraw from non existent account returns exception`() {
         val exception = assertThrows(Exception::class.java) {
-            accountService.withdraw("55555555", 10000.0)
+            accountService.withdraw("55555555", 10000.0, customerId = 10001)
         }
         assertEquals(exception.message, "Account not found")
     }
@@ -71,7 +86,7 @@ internal class AccountServiceTest @Autowired constructor(
     @Test
     fun `try to withdraw but insufficient funds in account returns exception`() {
         val exception = assertThrows(Exception::class.java) {
-            accountService.withdraw("88888888", 999999999.0)
+            accountService.withdraw("88888888", 999999999.0, customerId = 10001)
         }
         assertEquals(exception.message, "Balance not enough")
     }
@@ -81,7 +96,8 @@ internal class AccountServiceTest @Autowired constructor(
         val instruction = TransferInstructionRequest(
             "12345678",
             "88888888",
-            9999999999.99
+            9999999999.99,
+            10001
         )
         val exception = assertThrows(Exception::class.java) {
             accountService.transfer(instruction)
@@ -90,15 +106,18 @@ internal class AccountServiceTest @Autowired constructor(
     }
 
     @Test
+    @DirtiesContext
     fun `transfer to another account success`() {
         val instruction = TransferInstructionRequest(
             "12345678",
             "88888888",
-            10000.0
+            10000.0,
+            10001
         )
         val accounts = accountService.transfer(instruction)
 
-        assertEquals(accounts?.first()?.balance, 990000.0)
-        assertEquals(accounts?.last()?.balance, 1010000.0)
+        assertNotNull(accounts)
+        assertEquals(accounts.sourceAccount.balance, 990000.0)
+        assertEquals(accounts.targetAccount.balance, 1010000.0)
     }
 }
