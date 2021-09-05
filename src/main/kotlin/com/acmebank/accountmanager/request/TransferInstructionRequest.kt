@@ -1,5 +1,7 @@
 package com.acmebank.accountmanager.request
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class TransferInstructionRequest (
     val targetAccount: String,
     val sourceAccount: String,

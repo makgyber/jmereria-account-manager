@@ -4,30 +4,49 @@ import com.acmebank.accountmanager.model.Account
 import com.acmebank.accountmanager.request.TransferInstructionRequest
 import com.acmebank.accountmanager.response.TransferInstructionResponse
 import com.acmebank.accountmanager.service.AccountService
+import com.acmebank.accountmanager.service.CustomerService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.server.ResponseStatusException
 
 @RestController
-@RequestMapping("api/customers")
-class AccountController(val accountService: AccountService){
+@RequestMapping("api")
+class AccountController(val accountService: AccountService, val customerService: CustomerService){
 
-    @GetMapping("/{customerId}/accounts")
-    fun fetchAccountsOfCustomer(@PathVariable customerId: Long): Collection<Account> {
-        val accounts = accountService.getAccountsByCustomerId(customerId)
+    @GetMapping("/accounts")
+    fun fetchAccountsOfCustomer(@RequestHeader("X-Access-Token") accessToken: String): Collection<Account> {
+
+        val customer = customerService.fetchCustomerByAccessToken(accessToken)?:
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized")
+
+        val accounts = accountService.getAccountsByCustomerId(customer.id)
+
         if (accounts.isEmpty())
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find accounts for customer $customerId")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find accounts for customer")
         return accounts
     }
 
-    @GetMapping("/{customerId}/accounts/{accountNumber}")
-    fun fetchAccountOfCustomerByNumber(@PathVariable customerId: Long, @PathVariable accountNumber: String): Account =
-        accountService.findByAccountNumberAndCustomerId(accountNumber, customerId) ?:
-            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find account $accountNumber for customer $customerId")
+    @GetMapping("/accounts/{accountNumber}")
+    fun fetchAccountOfCustomerByNumber(@PathVariable accountNumber: String,
+                                       @RequestHeader("X-Access-Token") accessToken: String): Account {
+
+        val customer = customerService.fetchCustomerByAccessToken(accessToken)?:
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized")
+        return accountService.findByAccountNumberAndCustomerId(accountNumber, customer.id) ?:
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Could not find account $accountNumber for customer")
+    }
+
 
 
     @PostMapping("/accounts/transfer", consumes = ["application/json"], produces =["application/json"])
-    fun transfer(@RequestBody instruction: TransferInstructionRequest): TransferInstructionResponse? {
+    fun transfer(@RequestBody instruction: TransferInstructionRequest,
+                 @RequestHeader("X-Access-Token") accessToken: String): TransferInstructionResponse? {
+
+        val customer = customerService.fetchCustomerByAccessToken(accessToken)?:
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized")
+
+        if (customer.id != instruction.customerId)
+            throw ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authorized")
 
         if (instruction.validated()) {
             try {

@@ -1,6 +1,6 @@
-insert into CUSTOMER
+insert into CUSTOMER (id, name, access_token)
     select * from (
-        select 10001,'John Doe', 'abcdef-1234-567890'
+        select 10001, 'John Doe', 'abcdef-1234-567890'
     ) x where not exists(select id from CUSTOMER where id = 10001);
 insert into ACCOUNT
     select * from (

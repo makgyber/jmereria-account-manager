@@ -4,6 +4,7 @@ import com.acmebank.accountmanager.model.Account
 import com.acmebank.accountmanager.request.TransferInstructionRequest
 import com.acmebank.accountmanager.response.TransferInstructionResponse
 import com.fasterxml.jackson.databind.ObjectMapper
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 import org.assertj.core.api.Assertions
@@ -14,9 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.client.TestRestTemplate
-import org.springframework.boot.test.web.client.getForEntity
-import org.springframework.boot.test.web.client.postForEntity
-import org.springframework.http.HttpStatus
+import org.springframework.http.*
 import org.springframework.test.annotation.DirtiesContext
 
 @SpringBootTest(
@@ -35,7 +34,12 @@ internal class AccountControllerTest @Autowired  constructor(
 
     @Test
     fun `fetch Accounts Of existing Customer`() {
-        val entity = client.getForEntity<String>("/api/customers/10001/accounts")
+        val headers = HttpHeaders()
+        headers.set("X-Access-Token", "abcdef-1234-567890")
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val httpEntity = HttpEntity<String>(headers)
+        val entity = client.exchange("/api/accounts", HttpMethod.GET, httpEntity, String::class.java )
 
         Assertions.assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(entity.body).contains(account1.accountNumber)
@@ -44,7 +48,13 @@ internal class AccountControllerTest @Autowired  constructor(
 
     @Test
     fun `fetch one account Of existing Customer`() {
-        val entity = client.getForEntity<String>("/api/customers/10001/accounts/88888888")
+
+        val headers = HttpHeaders()
+        headers.set("X-Access-Token", "abcdef-1234-567890")
+        headers.contentType = MediaType.APPLICATION_JSON
+
+        val httpEntity = HttpEntity<String>(headers)
+        val entity = client.exchange("/api/accounts/88888888", HttpMethod.GET, httpEntity, String::class.java )
 
         Assertions.assertThat(entity.statusCode).isEqualTo(HttpStatus.OK)
         Assertions.assertThat(entity.body).contains(account2.accountNumber)
@@ -53,9 +63,17 @@ internal class AccountControllerTest @Autowired  constructor(
     @Test
     @DirtiesContext
     fun `transfer `() {
+
         val transferInstruction = TransferInstructionRequest(
             "12345678", "88888888", 1.0, customerId = 10001)
-        val entity = client.postForEntity<String>("/api/customers/accounts/transfer", transferInstruction)
+
+        val headers = HttpHeaders()
+        headers.set("X-Access-Token", "abcdef-1234-567890")
+        headers.contentType = MediaType.APPLICATION_JSON
+        val httpEntity = HttpEntity<String>(Json.encodeToString(transferInstruction), headers)
+
+        val entity = client.exchange("/api/accounts/transfer", HttpMethod.POST, httpEntity, String::class.java )
+
         val expectedTarget = Account(1, "12345678", 1000001.0,"HKD", 10001)
         val expectedSource = Account(2, "88888888", 999999.0,"HKD", 10001)
         assertNotNull(entity)
@@ -73,7 +91,13 @@ internal class AccountControllerTest @Autowired  constructor(
     fun `transfer failed with missing parameter`() {
         val transferInstruction = TransferInstructionRequest(
             "12345678", "", 999999.0, customerId = 10001)
-        val entity = client.postForEntity<String>("/api/customers/accounts/transfer", transferInstruction)
+
+        val headers = HttpHeaders()
+        headers.set("X-Access-Token", "abcdef-1234-567890")
+        headers.contentType = MediaType.APPLICATION_JSON
+        val httpEntity = HttpEntity<String>(Json.encodeToString(transferInstruction), headers)
+
+        val entity = client.exchange("/api/accounts/transfer", HttpMethod.POST, httpEntity, String::class.java )
 
         assertNotNull(entity)
         assertEquals(entity.statusCode, HttpStatus.BAD_REQUEST)
@@ -84,7 +108,14 @@ internal class AccountControllerTest @Autowired  constructor(
     fun `transfer failed when source and target are same`() {
         val transferInstruction = TransferInstructionRequest(
             "12345678", "12345678", 999999.0, customerId = 10001)
-        val entity = client.postForEntity<String>("/api/customers/accounts/transfer", transferInstruction)
+
+
+        val headers = HttpHeaders()
+        headers.set("X-Access-Token", "abcdef-1234-567890")
+        headers.contentType = MediaType.APPLICATION_JSON
+        val httpEntity = HttpEntity<String>(Json.encodeToString(transferInstruction), headers)
+
+        val entity = client.exchange("/api/accounts/transfer", HttpMethod.POST, httpEntity, String::class.java )
 
         assertNotNull(entity)
         assertEquals(entity.statusCode, HttpStatus.BAD_REQUEST)
@@ -95,7 +126,12 @@ internal class AccountControllerTest @Autowired  constructor(
     fun `transfer failed with insufficient funds`() {
         val transferInstruction = TransferInstructionRequest(
             "12345678", "88888888", 99999999.0, customerId = 10001)
-        val entity = client.postForEntity<String>("/api/customers/accounts/transfer", transferInstruction)
+        val headers = HttpHeaders()
+        headers.set("X-Access-Token", "abcdef-1234-567890")
+        headers.contentType = MediaType.APPLICATION_JSON
+        val httpEntity = HttpEntity<String>(Json.encodeToString(transferInstruction), headers)
+
+        val entity = client.exchange("/api/accounts/transfer", HttpMethod.POST, httpEntity, String::class.java )
 
         assertNotNull(entity)
         assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, entity.statusCode)

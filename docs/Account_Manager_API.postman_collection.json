@@ -9,16 +9,20 @@
 			"name": "Fetch all accounts for customer",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"value": "abcdef-1234-567890",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "{{ACCOUNT_MANAGER_URL}}/api/customers/10001/accounts",
+					"raw": "{{ACCOUNT_MANAGER_URL}}/api/accounts",
 					"host": [
 						"{{ACCOUNT_MANAGER_URL}}"
 					],
 					"path": [
 						"api",
-						"customers",
-						"10001",
 						"accounts"
 					]
 				}
@@ -29,16 +33,20 @@
 			"name": "Fetch Specific Account for Customer",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"value": "abcdef-1234-567890",
+						"type": "text"
+					}
+				],
 				"url": {
-					"raw": "{{ACCOUNT_MANAGER_URL}}/api/customers/10001/accounts/88888888",
+					"raw": "{{ACCOUNT_MANAGER_URL}}/api/accounts/88888888",
 					"host": [
 						"{{ACCOUNT_MANAGER_URL}}"
 					],
 					"path": [
 						"api",
-						"customers",
-						"10001",
 						"accounts",
 						"88888888"
 					]
@@ -50,7 +58,13 @@
 			"name": "Transfer Money",
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "X-Access-Token",
+						"value": "abcdef-1234-567890",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"sourceAccount\" : \"12345678\",\n    \"amount\" : 1900, \n    \"targetAccount\" : \"88888888\",\n    \"customerId\": 10001\n}",
@@ -61,13 +75,12 @@
 					}
 				},
 				"url": {
-					"raw": "{{ACCOUNT_MANAGER_URL}}/api/customers/accounts/transfer",
+					"raw": "{{ACCOUNT_MANAGER_URL}}/api/accounts/transfer",
 					"host": [
 						"{{ACCOUNT_MANAGER_URL}}"
 					],
 					"path": [
 						"api",
-						"customers",
 						"accounts",
 						"transfer"
 					]
