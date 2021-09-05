@@ -1,0 +1,79 @@
+{
+	"info": {
+		"_postman_id": "5170d038-f935-402f-a49d-58a248431c0d",
+		"name": "Account Manager API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Fetch all accounts for customer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ACCOUNT_MANAGER_URL}}/api/customers/10001/accounts",
+					"host": [
+						"{{ACCOUNT_MANAGER_URL}}"
+					],
+					"path": [
+						"api",
+						"customers",
+						"10001",
+						"accounts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch Specific Account for Customer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{ACCOUNT_MANAGER_URL}}/api/customers/10001/accounts/88888888",
+					"host": [
+						"{{ACCOUNT_MANAGER_URL}}"
+					],
+					"path": [
+						"api",
+						"customers",
+						"10001",
+						"accounts",
+						"88888888"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Transfer Money",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sourceAccount\" : \"12345678\",\n    \"amount\" : 1900, \n    \"targetAccount\" : \"88888888\",\n    \"customerId\": 10001\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{ACCOUNT_MANAGER_URL}}/api/customers/accounts/transfer",
+					"host": [
+						"{{ACCOUNT_MANAGER_URL}}"
+					],
+					"path": [
+						"api",
+						"customers",
+						"accounts",
+						"transfer"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
