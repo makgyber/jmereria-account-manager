@@ -106,7 +106,7 @@ X-Access-Token = abcdef-1234-567890
 ####  Second account
 <pre>
 "id": 2,
-"accountNumber": "12345678",
+"accountNumber": "88888888",
 "balance": 1000000.0,
 "currency": "HKD",
 "customerId": 10001
